@@ -7,5 +7,16 @@ namespace SZDRPG.Graphics
     {
         public float Rotation;
         public Time Duration;
+
+        public AnimationStep()
+        {
+            
+        }
+
+        public AnimationStep(float rotation, Time duration)
+        {
+            Rotation = rotation;
+            Duration = duration;
+        }
     }
 }

@@ -20,23 +20,34 @@ namespace SZDRPG.Graphics
             if (facing <= 45 || facing > 315)
                 return 0;
             if (facing <= 135 && facing > 45)
-                return 1;
+                return 3;
             if (facing <= 225 && facing > 135)
                 return 2;
             if (facing <= 315 && facing > 225)
-                return 3;
+                return 1;
             return 0;
+        }
+
+        public float RelativeDistance(AnimationState state)
+        {
+            return MathF.Sin((MathF.PI / 180) * state.facing) * RotationCenter.X / 2;
         }
         public Sprite Draw(AnimationPart part, AnimationState state)
         {
             AnimationStep step = part.CurrentStep(state.elapsed);
-            //Console.WriteLine(state.elapsed.AsSeconds() + "   " + part.CurrentStep(state.elapsed).Rotation);
             if (step == null)
             {
-                state.elapsed = Time.Zero;
-                step = part.CurrentStep(state.elapsed);
+                if (state.Repeatable)
+                {
+                    state.elapsed = Time.Zero;
+                    step = part.CurrentStep(state.elapsed);
+                }
+                else
+                {
+                    state.Finished = true;
+                }
             }
-            if (state.ID != LastState || LastStateTime != part.TotalStepTimeUntil(state.elapsed))
+            if (state.ID != LastState || LastStateTime != part.TotalStepTimeUntil(state.elapsed) && step != null)
             {
                 LastRotation = NewRotation;
                 LastState = state.ID;
@@ -45,15 +56,34 @@ namespace SZDRPG.Graphics
             }
             int direction = RotationState(state.facing);
             Sprite ret = new Sprite(BaseTexture[direction]);
+            if (step == null)
+            {
+                state.ID = 0;
+                state.elapsed = Time.Zero;
+                ret.Position = new Vector2f(
+                    (float) (state.Position.X + Math.Cos((Math.PI / 180) * state.facing) * RotationCenter.X) -
+                    ret.GetLocalBounds().Width / 2,
+                    (float) (state.Position.Y + Math.Sin((Math.PI / 180) * state.facing) * RotationCenter.X / 2 +
+                             RotationCenter.Y));
+                return ret;
+            }
+
             Time timeInState = state.elapsed - part.TotalStepTimeUntil(state.elapsed);
             float currentRotation;
             currentRotation = LastRotation + (NewRotation - LastRotation) * timeInState.AsSeconds() / step.Duration.AsSeconds();
-            float actualRotation = (state.facing - (int)(state.facing)/90*90)/ 90 * currentRotation;
+            //float actualRotation = (state.facing - (int)(state.facing)/90*90)/ 90 * currentRotation;
+            float actualRotation =
+                MathF.Atan(MathF.Tan(currentRotation * MathF.PI / 180) * MathF.Sin(state.facing * MathF.PI / 180)) *
+                180 / MathF.PI;
             float desiredHeight = (float) (Math.Cos((Math.PI / 180) * currentRotation) / Math.Cos((Math.PI / 180) * actualRotation) *
                                            BaseTexture[direction].GetLocalBounds().Height);
             ret.Scale = new Vector2f(1,desiredHeight/BaseTexture[direction].GetLocalBounds().Height);
             ret.Rotation = actualRotation;
-            ret.Position = new Vector2f((float) (state.Position.X+Math.Cos((Math.PI / 180) * state.facing)*RotationCenter.X),(float) (state.Position.Y+Math.Cos((Math.PI / 180) * state.facing)*RotationCenter.X+RotationCenter.Y));
+            ret.Position = new Vector2f(
+                (float) (state.Position.X + Math.Cos((Math.PI / 180) * state.facing) * RotationCenter.X) -
+                ret.GetLocalBounds().Width / 2,
+                (float) (state.Position.Y + Math.Sin((Math.PI / 180) * state.facing) * RotationCenter.X / 2 +
+                         RotationCenter.Y));
             ret.Origin = Origin;
             //ret.Rotation = 90;
             return ret;
