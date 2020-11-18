@@ -14,41 +14,68 @@ namespace SZDRPG.UIElements
         
         public OnClickDel OnClickFunction;
 
-        public UIButton(Vector2f position, Vector2f size, Color color, string text, OnClickDel onClickFunction) : base(position, size, color)
+        public bool Selected = false;
+
+        public UIButton(Vector2f position, Vector2f size, Color color, string text, OnClickDel onClickFunction=null) : base(position, size, color)
         {
             OnClickFunction = onClickFunction;
             Text.DisplayedString = text;
             Text.Font = new Font("../../../Resources/Fonts/Roboto-Regular.ttf");
-            Text.CharacterSize = 20;
-            Text.Position = position;
+            Text.CharacterSize = (uint) Size.Y/3;
+            while (Text.GetLocalBounds().Width > Size.X)
+                Text.CharacterSize--;
+            Vector2f padding = new Vector2f((Size.X-Text.GetLocalBounds().Width)/2, (Size.Y-Text.CharacterSize)/2);
+            Text.Position = new Vector2f(Position.X+padding.X, Position.Y+padding.Y);
 
         }
 
         public override void OnClick(object sender, MouseButtonEventArgs args)
         {
-            OnClickFunction?.Invoke(sender, args);
+            Selected = true;
+        }
+        
+        public override void OnRelease(object sender, MouseButtonEventArgs args)
+        {
+            Vector2f pos = new Vector2f(args.X,args.Y);
+            if(Selected && OnElement(pos))
+            {
+                OnClickFunction?.Invoke(sender, args);
+            }
+
+            Selected = false;
         }
 
         public override void Display(RenderWindow window)
         {
-            Shader blur = new Shader(null, null, "../../../Resources/Shader/blur.frag");
-            RectangleShape Shadow = new RectangleShape(Size);
-            Shadow.Position = new Vector2f(Position.X+3, Position.Y+3);
-            Shadow.FillColor = new Color(0,0,0,125);
             RectangleShape background = new RectangleShape(Size);
             background.Position = Position;
             background.FillColor = Color;
+            if(Selected)
+                background.FillColor = new Color((byte) (Color.R-10), (byte)(Color.G-10), (byte)(Color.B-10));
+            RectangleShape shadow = new RectangleShape(new Vector2f(Size.X+3, Size.Y+3));
+            shadow.Position = Position;
+            shadow.FillColor = new Color(0,0,0,60);
             RectangleShape horizontal = new RectangleShape(new Vector2f(background.Size.X+2,background.Size.Y));
             horizontal.Position = new Vector2f(background.Position.X-1, background.Position.Y);
-            horizontal.FillColor = Color;
+            if(Selected)
+                horizontal.Position = new Vector2f(background.Position.X+1, background.Position.Y+2);
+            horizontal.FillColor = background.FillColor;
             RectangleShape vertical = new RectangleShape(new Vector2f(background.Size.X,background.Size.Y+2));
             vertical.Position = new Vector2f(background.Position.X, background.Position.Y-1);
-            vertical.FillColor = Color;
-            
-            window.Draw(Shadow, blur);
+            if(Selected)
+                vertical.Position = new Vector2f(background.Position.X+2, background.Position.Y+1);
+            vertical.FillColor = background.FillColor;
+            if (Selected)
+                Text.Position += new Vector2f(2, 2);
+            window.Draw(shadow);
+            shadow.Size = Size;
+            shadow.Position = new Vector2f(Position.X+2, Position.Y+2);
+            window.Draw(shadow);
             window.Draw(horizontal);
             window.Draw(vertical);
             window.Draw(Text);
+            if(Selected)
+                Text.Position -= new Vector2f(2,2);
         }
     }
 }

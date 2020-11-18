@@ -20,6 +20,7 @@ namespace SZDRPG.UIElements
             Color = color;
         }
         public abstract void OnClick(object sender, MouseButtonEventArgs args);
+        public abstract void OnRelease(object sender, MouseButtonEventArgs args);
 
         public abstract void Display(RenderWindow window);
 
