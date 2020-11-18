@@ -13,11 +13,21 @@ namespace SZDRPG.UIElements
 
         public RectangleShape Background = new RectangleShape();
 
+        public Sprite BackgroundImage;
+
         public UIWindow(Vector2f position, Vector2f size, Color color) : base(position, size, color)
         {
             Background.Position = Position;
             Background.Size = Size;
             Background.FillColor = Color;
+        }
+        
+        public UIWindow(Vector2f position, Vector2f size, string path) : base(position, size, Color.Black)
+        {
+            Background.Position = Position;
+            Background.Size = Size;
+            Background.FillColor = Color.Black;
+            BackgroundImage = new Sprite(new Texture(path));
         }
 
         public override void OnClick(object sender, MouseButtonEventArgs args)
@@ -30,9 +40,20 @@ namespace SZDRPG.UIElements
             }
         }
 
+        public override void OnRelease(object sender, MouseButtonEventArgs args)
+        {
+            foreach (var element in Elements)
+            {
+                element.OnRelease(sender, args);
+            }
+        }
+
         public override void Display(RenderWindow window)
         {
-            window.Draw(Background);
+            if(BackgroundImage != null)
+                window.Draw(BackgroundImage);
+            else
+                window.Draw(Background);
             foreach (var element in Elements)
             {
                 element.Display(window);
