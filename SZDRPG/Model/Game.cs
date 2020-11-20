@@ -167,6 +167,10 @@ namespace SZDRPG.Model
             Pentities.Clear();
             Pentities.AddRange(Characters);
             Characters[0].Position = new Vector2f(gameroom.Size.X*16, gameroom.Size.Y*32);
+            foreach (var character in NetworkPlayers)
+            {
+                character.Position = new Vector2f(gameroom.Size.X*16, gameroom.Size.Y*32);
+            }
             Pentities.AddRange(gameroom.Environment);
             Map.Size = new Vector2f(gameroom.Size.X*32,gameroom.Size.Y*32);
             Map.GenerateTiles(4);

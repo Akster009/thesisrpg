@@ -323,6 +323,15 @@ namespace SZDRPG.Model
                 //Game.Characters[0].Display.State.UpdateFacing(window.MapPixelToCoords(Mouse.GetPosition(window)));
             }
         }
+        public void NetworkHolding(RenderWindow window)
+        {
+            if (Holding)
+            {
+                NetworkIntent.IntentNum = 0;
+                NetworkIntent.IntentPosition = (Vector2f) Game.Map.IntersectAt(Game.Characters[0].Position,window.MapPixelToCoords(Mouse.GetPosition(window)));
+            }
+        }
+        
         public void UpdateUI()
         {
             if (Game.Characters[0].SkillPoints > 0)
@@ -358,12 +367,17 @@ namespace SZDRPG.Model
             ((UITimerIcon) Elements[6]).State = 1 - Game.Characters[0].Abilities[2].CooldownPercentage();
             ((UITimerIcon) Elements[7]).State = 1 - Game.Characters[0].Abilities[3].CooldownPercentage();
         }
-        public void NextStep(View mainView, RenderWindow window, Time elapsed)
+
+        public void NextStep(View mainView, RenderWindow window, Time elapsed, bool single = true)
         {
-            Game.NextStep(elapsed);
+            if(single)
+                Game.NextStep(elapsed);
             UpdateUI();
             window.DispatchEvents();
-            HandleHolding(window);
+            if(single)
+                HandleHolding(window);
+            else
+                NetworkHolding(window);
             window.Clear();
             mainView.Center = new Vector2f(Game.Pentities[0].Position.X,
                 Game.Pentities[0].Position.Y);
@@ -504,6 +518,7 @@ namespace SZDRPG.Model
                 client.GameManager = this;
                 Thread clientThread = new Thread(client.Run);
                 clientThread.Start();
+                Clock timer = new Clock();
                 View mainView = new SFML.Graphics.View
                 {
                     Size = new Vector2f(1600, 900),
@@ -514,7 +529,7 @@ namespace SZDRPG.Model
                 {
                     lock (Game)
                     {
-                        NextStep(mainView,window,Time.Zero);
+                        NextStep(mainView,window,timer.Restart(), false);
                     }
                 }
                 client.KeepRunning = false;
