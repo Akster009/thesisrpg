@@ -381,6 +381,7 @@ namespace SZDRPG.Model
             window.Clear();
             mainView.Center = new Vector2f(Game.Pentities[0].Position.X,
                 Game.Pentities[0].Position.Y);
+            //Console.WriteLine(mainView.Center.X + " " + mainView.Center.Y);
             window.SetView(mainView);
             Draw(window);
             window.Display();

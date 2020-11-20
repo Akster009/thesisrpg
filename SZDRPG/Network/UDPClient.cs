@@ -16,11 +16,14 @@ namespace SZDRPG.Network
         public bool KeepRunning = true;
         public UdpClient UdpReceiver = new UdpClient(20201);
         public UdpClient UdpSender = new UdpClient(20200);
+        public Byte[] ReceiveBytes;
 
         public void Run()
         {
             Thread sender = new Thread(Send);
+            Thread proccess = new Thread(Proccess);
             sender.Start();
+            proccess.Start();
             Receive();
         }
         public void Receive()
@@ -29,12 +32,24 @@ namespace SZDRPG.Network
             IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 20201);
             while (KeepRunning)
             {
-                Byte[] receiveBytes = UdpReceiver.Receive(ref RemoteIpEndPoint);
-                string returnData = Encoding.ASCII.GetString(receiveBytes);
-                HandleMessage(returnData, RemoteIpEndPoint);
+                //Console.WriteLine(UdpReceiver.Available);
+                ReceiveBytes = UdpReceiver.Receive(ref RemoteIpEndPoint);
+                //Byte[] receiveBytes = UdpReceiver.ReceiveAsync().Result.Buffer;
             }
         }
 
+        public void Proccess()
+        {
+            while (KeepRunning)
+            {
+                if(ReceiveBytes != null)
+                {
+                    string returnData = Encoding.ASCII.GetString(ReceiveBytes);
+                    HandleMessage(returnData);
+                }
+            }
+        }
+        
         public void Send()
         {
             UdpSender.Connect(Host, 20200);
@@ -46,13 +61,13 @@ namespace SZDRPG.Network
                 Thread.Sleep(10);
             }
         }
-        private void HandleMessage(string returnData, IPEndPoint RemoteIpEndPoint)
+        private void HandleMessage(string returnData)
         {
             string[] lines = returnData.Split("|");
             Game game = GameManager.Game;
             lock(game)
             {
-                if (lines.Length > 0)
+                if (lines.Length > 1)
                 {
                     int maplines = int.Parse(lines[3]) * 3 + 4;
                     if (int.Parse(lines[0]) != game.Map.num)
@@ -75,16 +90,16 @@ namespace SZDRPG.Network
                     int entityLineNums = 0;
                     for (int i = 0; i < int.Parse(lines[maplines]); i++)
                     {
-                        if (lines[entityLineNums + maplines + 1].Equals("NetworkPCharacter"))
+                        if (lines[entityLineNums + maplines + 1].Equals("Network"))
                         {
-                            game.Characters[0].Position = new Vector2f(int.Parse(lines[entityLineNums + maplines + 3]),
-                                int.Parse(lines[entityLineNums + maplines + 4]));
-                            game.Characters[0].Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
-                            game.Characters[0].Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
-                            game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 8]);
-                            game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 16]);
+                            game.Characters[0].Position = new Vector2f(int.Parse(lines[entityLineNums + maplines + 4]),
+                                int.Parse(lines[entityLineNums + maplines + 5]));
+                            game.Characters[0].Display.State.ID = int.Parse(lines[entityLineNums + maplines + 6]);
+                            game.Characters[0].Display.State.facing = float.Parse(lines[entityLineNums + maplines + 7]);
+                            game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 9]);
                             game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 17]);
-                            entityLineNums += 17;
+                            game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 18]);
+                            entityLineNums += 18;
                         }
                         else if (lines[entityLineNums + maplines + 1].Equals("PCharacter"))
                         {
@@ -116,6 +131,7 @@ namespace SZDRPG.Network
                                 int.Parse(lines[entityLineNums + maplines + 4]));
                             environment.Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
                             environment.Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
+                            game.Pentities.Add(environment);
                             entityLineNums += 7;
                         }
                     }

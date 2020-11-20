@@ -49,7 +49,7 @@ namespace SZDRPG.Network
                         UdpSender.Send(GameManager.Status(), GameManager.Game.StatusLength);
                     }
                 }
-                Thread.Sleep(10);
+                //Thread.Sleep(10);
             }
         }
 
