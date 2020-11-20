@@ -50,60 +50,67 @@ namespace SZDRPG.Network
         {
             string[] lines = returnData.Split("|");
             Game game = GameManager.Game;
-            if (lines.Length > 0)
+            lock(game)
             {
-                int maplines = int.Parse(lines[3]) * 3 + 4;
-                if (int.Parse(lines[0]) != game.Map.num)
+                if (lines.Length > 0)
                 {
-                    game.Map.num = int.Parse(lines[0]);
-                    game.Map.Size = new Vector2f(int.Parse(lines[1]),int.Parse(lines[2]));
-                    game.Map.Tiles.Clear();
-                    game.Map.MapLayout.Clear();
-                    for (int i = 0; i < int.Parse(lines[3]); i++)
+                    int maplines = int.Parse(lines[3]) * 3 + 4;
+                    if (int.Parse(lines[0]) != game.Map.num)
                     {
-                        game.Map.Tiles.Add(new Map.MapTileCenter(int.Parse(lines[4 + i * 3]),
-                            new Vector2f(int.Parse(lines[5 + i * 3]), int.Parse(lines[6 + i * 3]))));
-                    }
-                    game.Map.LoadTiles();
-                }
+                        game.Map.num = int.Parse(lines[0]);
+                        game.Map.Size = new Vector2f(int.Parse(lines[1]), int.Parse(lines[2]));
+                        game.Map.Tiles.Clear();
+                        game.Map.MapLayout.Clear();
+                        for (int i = 0; i < int.Parse(lines[3]); i++)
+                        {
+                            game.Map.Tiles.Add(new Map.MapTileCenter(int.Parse(lines[4 + i * 3]),
+                                new Vector2f(int.Parse(lines[5 + i * 3]), int.Parse(lines[6 + i * 3]))));
+                        }
 
-                game.Pentities.Clear();
-                game.Pentities.Add(game.Characters[0]);
-                int entityLineNums = 0;
-                for (int i = 0; i < int.Parse(lines[maplines]); i++)
-                {
-                    if (lines[entityLineNums + maplines + 1].Equals("NetworkPCharacter"))
-                    {
-                        game.Characters[0].Position = new Vector2f(int.Parse(lines[entityLineNums + maplines + 3]),
-                            int.Parse(lines[entityLineNums + maplines + 4]));
-                        game.Characters[0].Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
-                        game.Characters[0].Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
-                        game.Characters[0].Display.State.elapsed = Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));
-                        game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 8]);
-                        game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 16]);
-                        game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 17]);
-                        entityLineNums += 17;
+                        game.Map.LoadTiles();
                     }
-                    else if (lines[entityLineNums + maplines + 1].Equals("PCharacter"))
+
+                    game.Pentities.Clear();
+                    game.Pentities.Add(game.Characters[0]);
+                    int entityLineNums = 0;
+                    for (int i = 0; i < int.Parse(lines[maplines]); i++)
                     {
-                        PCharacter character = new PCharacter(lines[entityLineNums + maplines + 2],game);
-                        character.Position = new Vector2f(int.Parse(lines[entityLineNums + maplines + 3]),
-                            int.Parse(lines[entityLineNums + maplines + 4]));
-                        character.Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
-                        character.Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
-                        character.Display.State.elapsed = Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));
-                        game.Pentities.Add(character);
-                        entityLineNums += 17;
-                    }
-                    else if (lines[entityLineNums + maplines + 1].Equals("PProjectile"))
-                    {
-                        PProjectile projectile = new PProjectile(lines[entityLineNums + maplines + 2],game);
-                        projectile.Position = new Vector2f(int.Parse(lines[entityLineNums + maplines + 3]),
-                            int.Parse(lines[entityLineNums + maplines + 4]));
-                        projectile.Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
-                        projectile.Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
-                        projectile.Display.State.elapsed = Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));
-                        entityLineNums += 7;
+                        if (lines[entityLineNums + maplines + 1].Equals("NetworkPCharacter"))
+                        {
+                            game.Characters[0].Position = new Vector2f(int.Parse(lines[entityLineNums + maplines + 3]),
+                                int.Parse(lines[entityLineNums + maplines + 4]));
+                            game.Characters[0].Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
+                            game.Characters[0].Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
+                            game.Characters[0].Display.State.elapsed =
+                                Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));
+                            game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 8]);
+                            game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 16]);
+                            game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 17]);
+                            entityLineNums += 17;
+                        }
+                        else if (lines[entityLineNums + maplines + 1].Equals("PCharacter"))
+                        {
+                            PCharacter character = new PCharacter(lines[entityLineNums + maplines + 2], game);
+                            character.Position = new Vector2f(int.Parse(lines[entityLineNums + maplines + 3]),
+                                int.Parse(lines[entityLineNums + maplines + 4]));
+                            character.Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
+                            character.Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
+                            character.Display.State.elapsed =
+                                Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));
+                            game.Pentities.Add(character);
+                            entityLineNums += 17;
+                        }
+                        else if (lines[entityLineNums + maplines + 1].Equals("PProjectile"))
+                        {
+                            PProjectile projectile = new PProjectile(lines[entityLineNums + maplines + 2], game);
+                            projectile.Position = new Vector2f(int.Parse(lines[entityLineNums + maplines + 3]),
+                                int.Parse(lines[entityLineNums + maplines + 4]));
+                            projectile.Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
+                            projectile.Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
+                            projectile.Display.State.elapsed =
+                                Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));
+                            entityLineNums += 7;
+                        }
                     }
                 }
             }

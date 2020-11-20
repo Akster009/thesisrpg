@@ -512,7 +512,10 @@ namespace SZDRPG.Model
                 };
                 while (!exit)
                 {
-                    NextStep(mainView,window,Time.Zero);
+                    lock (Game)
+                    {
+                        NextStep(mainView,window,Time.Zero);
+                    }
                 }
                 client.KeepRunning = false;
             }
