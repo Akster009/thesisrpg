@@ -11,7 +11,7 @@ namespace SZDRPG.Graphics
         public float LastRotation = 0;
         public float NewRotation = 0;
         public Vector2f RotationCenter = new Vector2f(0,0);
-        public Vector2f Origin = new Vector2f(0,0);
+        public Vector3f Origin = new Vector3f(0,0,0);
         public int LastState = -1;
         public Time LastStateTime;
 
@@ -31,6 +31,22 @@ namespace SZDRPG.Graphics
         public float RelativeDistance(AnimationState state)
         {
             return MathF.Sin((MathF.PI / 180) * state.facing) * RotationCenter.X / 2;
+        }
+
+        public Vector2f GetOriginCenter(int direction)
+        {
+            switch (direction)
+            {
+                case 0:
+                    return new Vector2f(Origin.X,Origin.Z);
+                case 1:
+                    return new Vector2f(-Origin.Y, Origin.Z);
+                case 2:
+                    return new Vector2f(-Origin.X,Origin.Z);
+                case 3:
+                    return new Vector2f(Origin.Y,Origin.Z);
+            }
+            return new Vector2f();
         }
         public Sprite Draw(AnimationPart part, AnimationState state)
         {
@@ -79,12 +95,10 @@ namespace SZDRPG.Graphics
                                            BaseTexture[direction].GetLocalBounds().Height);
             ret.Scale = new Vector2f(1,desiredHeight/BaseTexture[direction].GetLocalBounds().Height);
             ret.Rotation = actualRotation;
+            ret.Origin = GetOriginCenter(direction);
             ret.Position = new Vector2f(
-                (float) (state.Position.X + Math.Cos((Math.PI / 180) * state.facing) * RotationCenter.X) -
-                ret.GetLocalBounds().Width / 2,
-                (float) (state.Position.Y + Math.Sin((Math.PI / 180) * state.facing) * RotationCenter.X / 2 +
-                         RotationCenter.Y));
-            ret.Origin = Origin;
+                (float) (state.Position.X + Math.Cos((Math.PI / 180) * state.facing) * RotationCenter.X)  - Origin.X - ret.GetLocalBounds().Width / 2,
+                (float) (state.Position.Y + Math.Sin((Math.PI / 180) * state.facing) * RotationCenter.X / 2 + RotationCenter.Y + Origin.Y));
             //ret.Rotation = 90;
             return ret;
         }

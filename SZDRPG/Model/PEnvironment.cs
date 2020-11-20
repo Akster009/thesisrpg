@@ -3,6 +3,7 @@ using System.IO;
 using SFML.Graphics;
 using SFML.System;
 using SZDRPG.Graphics;
+using LoadingFailedException = SFML.LoadingFailedException;
 
 namespace SZDRPG.Model
 {
@@ -56,19 +57,27 @@ namespace SZDRPG.Model
 
         public void LoadGraphics(string name)
         {
-            GPart part = new GPart();
-            part.BaseTexture.Add(new Sprite(new Texture("../../../Resources/Graphics/Environment/" + name + "/" + name + ".png")));
-            GCharacter character = new GCharacter();
-            character.Parts.Add(part);
-            AnimationStep step = new AnimationStep();
-            step.Duration = Time.FromSeconds(1f);
-            step.Rotation = 0;
-            AnimationPart animPart = new AnimationPart();
-            animPart.Steps.Add(step);
-            Animation anim = new Animation();
-            anim.Parts.Add(animPart);
-            character.Animations.Add(anim);
-            Display = character;
+            try
+            {
+                GPart part = new GPart();
+                part.BaseTexture.Add(new Sprite(new Texture("../../../Resources/Graphics/Environment/" + name + "/" +
+                                                            name + ".png")));
+                GCharacter character = new GCharacter();
+                character.Parts.Add(part);
+                AnimationStep step = new AnimationStep();
+                step.Duration = Time.FromSeconds(1f);
+                step.Rotation = 0;
+                AnimationPart animPart = new AnimationPart();
+                animPart.Steps.Add(step);
+                Animation anim = new Animation();
+                anim.Parts.Add(animPart);
+                character.Animations.Add(anim);
+                Display = character;
+            }
+            catch (LoadingFailedException e)
+            {
+                Console.WriteLine("No graphics file for " + name);
+            }
         }
 
         public override void Draw(RenderWindow window)
@@ -81,9 +90,15 @@ namespace SZDRPG.Model
             
         }
 
-        public override void TakeDamage(PCharacter pCharacter, int attack)
+        public override string ToString()
         {
-            
+            return "PCEnvironment|" + Name + "|" + (int) Position.X + "|" + (int) Position.Y + "|" + Display.State.ID +
+                   "|" + Display.State.facing + "|" + Display.State.elapsed.AsSeconds();
+        }
+
+        public override int TakeDamage(PCharacter pCharacter, int attack)
+        {
+            return 0;
         }
 
         public override bool IsCollidable()

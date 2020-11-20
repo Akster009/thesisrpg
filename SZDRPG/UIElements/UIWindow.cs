@@ -4,6 +4,7 @@ using SFML.Graphics;
 using SFML.Graphics.Glsl;
 using SFML.System;
 using SFML.Window;
+using SZDRPG.Graphics;
 
 namespace SZDRPG.UIElements
 {
@@ -28,15 +29,19 @@ namespace SZDRPG.UIElements
             Background.Size = Size;
             Background.FillColor = Color.Black;
             BackgroundImage = new Sprite(new Texture(path));
+            BackgroundImage.Scale = new Vector2f(Size.X / BackgroundImage.GetGlobalBounds().Width,Size.Y / BackgroundImage.GetGlobalBounds().Height);
         }
 
         public override void OnClick(object sender, MouseButtonEventArgs args)
         {
-            foreach (var element in Elements)
+            if(Visible)
             {
-                Vector2f pos = new Vector2f(args.X,args.Y);
-                if(element.OnElement(pos))
-                    element.OnClick(sender, args);
+                foreach (var element in Elements)
+                {
+                    Vector2f pos = new Vector2f(args.X, args.Y);
+                    if (element.OnElement(pos) && element.Visible)
+                        element.OnClick(sender, args);
+                }
             }
         }
 
@@ -50,13 +55,24 @@ namespace SZDRPG.UIElements
 
         public override void Display(RenderWindow window)
         {
-            if(BackgroundImage != null)
-                window.Draw(BackgroundImage);
-            else
-                window.Draw(Background);
-            foreach (var element in Elements)
+            if(Visible)
             {
-                element.Display(window);
+                View old = new View(window.GetView());
+                if(Absolute)
+                    window.SetView(window.DefaultView);
+                if (BackgroundImage != null)
+                {
+                    BackgroundImage.Position = Position;
+                    window.Draw(BackgroundImage);
+                }
+                else
+                    window.Draw(Background);
+                foreach (var element in Elements)
+                {
+                    element.Display(window);
+                }
+                if(Absolute)
+                    window.SetView(old);
             }
         }
     }

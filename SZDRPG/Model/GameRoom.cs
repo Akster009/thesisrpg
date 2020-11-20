@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using SFML.System;
 
@@ -16,34 +17,29 @@ namespace SZDRPG.Model
 
         public void GenerateWalls()
         {
-            for (int i = 0; i < Size.X; i++)
+            Random rand = new Random();
+            int wallNum = rand.Next(0, (int) (Size.X * Size.X * 0.0256));
+            for (int i = 0; i < wallNum; i++)
             {
-                for (int j = 0; j < Size.Y; j++)
-                {
-                    if (i == 0 || i == Size.X - 1)
-                    {
-                        PEnvironment wall = new PEnvironment("Wall", Game);
-                        wall.Position = new Vector2f(i*32,j*32);
-                        wall.Size = new Vector2f(32,32);
-                        //wall.hitMesh.Size = wall.Size;
-                        //wall.hitMesh.GenerateHitMesh(wall.Position);
-                        wall.GenerateHitmesh();
-                        Environment.Add(wall);
-                    }
-
-                    if (j == 0 || j == Size.Y - 1 && i != 0 && i != Size.X - 1)
-                    {
-                        PEnvironment wall = new PEnvironment("Wall", Game);
-                        wall.Position = new Vector2f(i*32,j*32);
-                        wall.Size = new Vector2f(32,32);
-                        //wall.hitMesh.Size = wall.Size;
-                        //wall.hitMesh.GenerateHitMesh(wall.Position);
-                        wall.GenerateHitmesh();
-                        Environment.Add(wall);
-                    }
-                }
+                PEnvironment wall = new PEnvironment("Wall", Game);
+                wall.Size = new Vector2f(64,64);
+                wall.GenerateHitmesh();
+                wall.Position = new Vector2f(rand.Next(200,Size.X*32-200),rand.Next(200, Size.Y*32-200));
+                if(!TooClose(wall.Position, 200))
+                    Environment.Add(wall);
             }
         }
-        
+
+        private bool TooClose(Vector2f wallPosition, float distance)
+        {
+            foreach (var environment in Environment)
+            {
+                if ((environment.Position - wallPosition).X * (environment.Position - wallPosition).X +
+                    (environment.Position - wallPosition).Y * (environment.Position - wallPosition).Y >
+                    distance * distance)
+                    return true;
+            }
+            return false;
+        }
     }
 }

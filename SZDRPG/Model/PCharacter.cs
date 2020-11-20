@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using SFML.Graphics;
@@ -11,19 +12,92 @@ namespace SZDRPG.Model
     public class PCharacter : PEntity
     {
         
-        public float Reach = 30;
-        public float Speed = 300;
+        public float Reach = 50;
+        public float Speed = 200;
         public int Vigor = 10;
-        public int Level = 1;
-        public int Experience = 0;
-        public int Health=10;
         public int Strength=10;
         public int Agility=10;
+        public int Intelligence = 10;
+        public int Spirit = 10;
+        private int level = 1;
+
+        public int Level
+        {
+            get
+            {
+                return level;
+            }
+            set
+            {
+                if (value < level)
+                    level = value;
+                while(level < value)
+                {
+                    SkillPoints += 5;
+                    Vigor++;
+                    Strength++;
+                    Agility++;
+                    Intelligence++;
+                    Spirit++;
+                    Health = Vigor;
+                    Mana = Intelligence;
+                    level++;
+                }
+            }
+        }
+        private int experience = 0;
+
+        public int Experience
+        {
+            get
+            {
+                return experience;
+            }
+            set
+            {
+                while (value >= ExperienceToNextLevel())
+                {
+                    value -= ExperienceToNextLevel();
+                    Level++;
+                }
+
+                experience = value;
+            }
+        }
+        public int Health=10;
+        public int Mana = 10;
         public SZDRPG.Pathing.Path Path;
         public bool Busy = false;
+        public Time LastManaGain = Time.Zero;
+        public int SkillPoints = 0;
+
+        public class Ability
+        {
+            public delegate void AbilityDel(PCharacter Owner);
+            public AbilityDel Cast;
+            public Time Cooldown = Time.Zero;
+            public Time LastUsed = Time.Zero;
+            public int Mana = 0;
+            public Ability(Time cooldown, int mana = 0, AbilityDel cast = null)
+            {
+                Cast = cast;
+                Mana = mana;
+                Cooldown = cooldown;
+            }
+            public float CooldownPercentage()
+            {
+                float cd = LastUsed.AsSeconds() / Cooldown.AsSeconds();
+                if (cd > 1)
+                    cd = 1;
+                return cd;
+            }
+        }
+        public List<Ability> Abilities = new List<Ability>();
         public PCharacter(string name, Game game)
         {
+            Name = name;
             Game = game;
+            Abilities.Add(new Ability(Time.FromSeconds(1)));
             try
             {
                 string[] lines = System.IO.File.ReadAllLines("../../../Resources/Graphics/Character/" + name + "/setup.txt");
@@ -33,40 +107,46 @@ namespace SZDRPG.Model
             {
                 Console.WriteLine("No graphics setup file for " + name);
                 Console.WriteLine("Initializing as default texture");
-                GPart defPart = new GPart();
-                defPart.BaseTexture.Add(new Sprite(new Texture("../../../Resources/Graphics/default.png")));
-                GCharacter defCharacter = new GCharacter();
-                defCharacter.Parts.Add(defPart);
-                AnimationStep defStep = new AnimationStep();
-                defStep.Duration = Time.FromSeconds(1f);
-                defStep.Rotation = 0;
-                AnimationPart defAnimPart = new AnimationPart();
-                defAnimPart.Steps.Add(defStep);
-                Animation defAnim = new Animation();
-                defAnim.Parts.Add(defAnimPart);
-                defCharacter.Animations.Add(defAnim);
-                Display = defCharacter;
+                LoadDefault();
             }
             catch (DirectoryNotFoundException directoryNotFoundException)
             {
-                Console.WriteLine("No graphics setup file for " + name);
+                Console.WriteLine("No graphics directory for " + name);
                 Console.WriteLine("Initializing as default texture");
-                GPart defPart = new GPart();
-                defPart.BaseTexture.Add(new Sprite(new Texture("../../../Resources/Graphics/default.png")));
-                GCharacter defCharacter = new GCharacter();
-                defCharacter.Parts.Add(defPart);
-                AnimationStep defStep = new AnimationStep();
-                defStep.Duration = Time.FromSeconds(1f);
-                defStep.Rotation = 0;
-                AnimationPart defAnimPart = new AnimationPart();
-                defAnimPart.Steps.Add(defStep);
-                Animation defAnim = new Animation();
-                defAnim.Parts.Add(defAnimPart);
-                defCharacter.Animations.Add(defAnim);
-                Display = defCharacter;
+                LoadDefault();
             }
         }
+        public int ExperienceToNextLevel()
+        {
+            return (int)((float) Level / (9 + Level) * 100);
+        }
 
+        public void IncreseSkill(int idx)
+        {
+            if(SkillPoints > 0)
+            {
+                switch (idx)
+                {
+                    case 0:
+                        Vigor++;
+                        break;
+                    case 1:
+                        Strength++;
+                        break;
+                    case 2:
+                        Agility++;
+                        break;
+                    case 3:
+                        Intelligence++;
+                        break;
+                    case 4:
+                        Spirit++;
+                        break;
+                }
+
+                SkillPoints--;
+            }
+        }
         private void LoadCharacterRig(string name, string[] lines)
         {
             Display = new GCharacter();
@@ -82,7 +162,7 @@ namespace SZDRPG.Model
                 string[] rotCenterStrings = lines[i * 3 + 2].Split(" ");
                 part.RotationCenter = new Vector2f(float.Parse(rotCenterStrings[0]), float.Parse(rotCenterStrings[1]));
                 string[] originStrings = lines[i * 3 + 3].Split(" ");
-                part.Origin = new Vector2f(float.Parse(originStrings[0]), float.Parse(originStrings[1]));
+                part.Origin = new Vector3f(float.Parse(originStrings[0]), float.Parse(originStrings[1]), float.Parse(originStrings[1]));
                 Display.Parts.Add(part);
             }
             Display.State.ID = 0;
@@ -117,14 +197,31 @@ namespace SZDRPG.Model
                 Display.Animations.Add(animation);
             }
         }
-
         public override void Draw(RenderWindow window)
         {
+            /*VertexArray hitbox = new VertexArray(PrimitiveType.TriangleFan);
+            hitbox.Append(new Vertex(Position,Color.Red));
+            hitbox.Append(new Vertex(new Vector2f(Position.X-hitMesh.Size.X/2, Position.Y), Color.Red));
+            hitbox.Append(new Vertex(new Vector2f(Position.X-hitMesh.Size.X/2, Position.Y - hitMesh.Size.Y), Color.Red));
+            hitbox.Append(new Vertex(new Vector2f(Position.X+hitMesh.Size.X/2, Position.Y - hitMesh.Size.Y), Color.Red));
+            hitbox.Append(new Vertex(new Vector2f(Position.X+hitMesh.Size.X/2, Position.Y), Color.Red));
+            hitbox.Append(new Vertex(new Vector2f(Position.X-hitMesh.Size.X/2, Position.Y), Color.Red));
+            CircleShape reach = new CircleShape(Reach);
+            reach.Position = new Vector2f(Position.X - Reach, Position.Y - Reach);
+            reach.FillColor = Color.Blue;
+            window.Draw(hitbox);
+            window.Draw(reach);*/
             Display.Draw(window, Position);
         }
-
         public override void NextAction(Time elapsed)
         {
+            if (Health <= 0) return;
+            foreach (var ability in Abilities)
+            {
+                ability.LastUsed += elapsed;
+            }
+
+            HandleManaGain(elapsed);
             if (Busy)
             {
                 BusyAction(elapsed);
@@ -135,7 +232,7 @@ namespace SZDRPG.Model
             }
             else if (Direction != null)
             {
-                Path = new Pathing.Path(Position,(Vector2f) Direction, Game, this);
+                Path = new Pathing.Path(Position, (Vector2f) Direction, Game, this);
                 MoveAction(Direction, elapsed);
             }
             else
@@ -144,6 +241,34 @@ namespace SZDRPG.Model
             }
         }
 
+        private void HandleManaGain(Time elapsed)
+        {
+            if (Mana < Intelligence)
+            {
+                LastManaGain += elapsed;
+                while (LastManaGain > Time.FromSeconds(10)/Spirit)
+                {
+                    Mana++;
+                    LastManaGain -= Time.FromSeconds(10)/Spirit;
+                }
+            }
+            else
+            {
+                LastManaGain = Time.Zero;
+            }
+        }
+
+        public void DoSpecialAttack(int idx)
+        {
+            if(!Busy && Mana >= Abilities[idx].Mana && Abilities[idx].LastUsed >= Abilities[idx].Cooldown)
+            {
+                Abilities[idx].LastUsed = Time.Zero;
+                Busy = true;
+                UpdateState(2+idx, Time.Zero);
+                Mana -= Abilities[idx].Mana;
+                Abilities[idx].Cast(this);
+            }
+        }
         private void UpdateState(int idx, Time elapsed)
         {
             if (Display.State.ID != idx)
@@ -173,11 +298,14 @@ namespace SZDRPG.Model
             }
         }
 
-        public override void TakeDamage(PCharacter pCharacter, int attack)
+        public override int TakeDamage(PCharacter pCharacter, int attack)
         {
             Health -= (int)(attack * (1-DamageReduction()));
             if (Health < 0)
                 Health = 0;
+            if (Health == 0)
+                return Level;
+            return 0;
         }
 
         private float DamageReduction()
@@ -199,7 +327,8 @@ namespace SZDRPG.Model
         {
             if (InReach(Target) && Target.IsHittable())
             {
-                UpdateState(2, elapsed);
+                UpdateState(2, Time.Zero);
+                Abilities[0].LastUsed = Time.Zero;
                 Hit(Target);
             }
             else
@@ -284,16 +413,30 @@ namespace SZDRPG.Model
                 Position += new Vector2f(direction.Value.X, direction.Value.Y);
         }
 
-        private void Hit(PEntity target)
+        public void Hit(PEntity target)
         {
-            target.TakeDamage(this, Strength);
+            Experience += target.TakeDamage(this, Strength);
             Busy = true;
         }
 
-        private bool InReach(PEntity target)
+        public bool InReach(PEntity target, float scale = 1)
         {
             return (Position.X - target.Position.X) * (Position.X - target.Position.X) +
-                (Position.Y - target.Position.Y) * (Position.Y - target.Position.Y) < Reach * Reach;
+                (Position.Y - target.Position.Y) * (Position.Y - target.Position.Y) < (Reach*scale) * (Reach*scale);
+        }
+
+        public override string ToString()
+        {
+            return "PCharacter|" + Name + "|" + (int) Position.X + "|" + (int) Position.Y + "|" + Display.State.ID +
+                   "|" + Display.State.facing + "|" + Display.State.elapsed.AsSeconds() + "|" + Experience + "|" +
+                   Level + "|" + SkillPoints + "|" + Vigor + "|" + Strength + "|" + Agility + "|" + Intelligence + "|" +
+                   Spirit + "|" + Health + "|" + Mana;
+        }
+
+        public new bool OnEntity(Vector2f pos)
+        {
+            return pos.X >= Position.X - hitMesh.Size.X / 2 && pos.X <= Position.X + hitMesh.Size.X / 2 &&
+                   pos.Y <= Position.Y && pos.Y >= Position.Y - hitMesh.Size.Y;
         }
     }
 }

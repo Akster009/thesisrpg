@@ -1,23 +1,26 @@
 6
 Head
-0 -35
-0 0
+0 -100
+0 0 0
 Chest
-0 -10
-0 0
+0 -50
+0 0 0
 LeftArm
-7 -10
-0 0
+14 -50
+0 0 0
 RightArm
--7 -10
-0 0
+-14 -50
+0 8 30
 LeftLeg
-4 0
-0 0
+8 -30
+0 0 0
 RightLeg
--4 0
-0 0
-3
+-8 -30
+0 0 0
+6
 Idle
 Walking
 BasicAttack
+Throw
+WhirlWind
+Lunge

@@ -1,0 +1,26 @@
+6
+Head
+0 -35
+0 0
+Chest
+0 -10
+0 0
+LeftArm
+7 -10
+0 0
+RightArm
+-7 -10
+0 0
+LeftLeg
+4 0
+0 0
+RightLeg
+-4 0
+0 0
+6
+Idle
+Walking
+BasicAttack
+WhirlWind
+Lunge
+Throw

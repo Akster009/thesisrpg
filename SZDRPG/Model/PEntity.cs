@@ -15,11 +15,13 @@ namespace SZDRPG.Model
         public Vector2f Size;
         public GCharacter Display;
         public abstract void Draw(RenderWindow window);
-        //public abstract void NextAction(Time elapsed);
         public delegate void IntentDel(Vector2f direction, PEntity target);
         public PEntity Target;
         public Vector2f? Direction;
         public Game Game;
+        public string Name;
+
+        public abstract override string ToString();
 
         public class HitMesh
         {
@@ -64,7 +66,7 @@ namespace SZDRPG.Model
                    pos.Y >= Position.Y && pos.Y <= Position.Y + hitMesh.Size.Y;
         }
 
-        public abstract void TakeDamage(PCharacter pCharacter, int attack);
+        public abstract int TakeDamage(PCharacter pCharacter, int attack);
 
         public abstract bool IsCollidable();
         public abstract bool IsHittable();
@@ -76,5 +78,22 @@ namespace SZDRPG.Model
         }
 
         public abstract void NextAction(Time elapsed);
+
+        public void LoadDefault()
+        {
+            GPart defPart = new GPart();
+            defPart.BaseTexture.Add(new Sprite(new Texture("../../../Resources/Graphics/default.png")));
+            GCharacter defCharacter = new GCharacter();
+            defCharacter.Parts.Add(defPart);
+            AnimationStep defStep = new AnimationStep();
+            defStep.Duration = Time.FromSeconds(1f);
+            defStep.Rotation = 0;
+            AnimationPart defAnimPart = new AnimationPart();
+            defAnimPart.Steps.Add(defStep);
+            Animation defAnim = new Animation();
+            defAnim.Parts.Add(defAnimPart);
+            defCharacter.Animations.Add(defAnim);
+            Display = defCharacter;
+        }
     }
 }

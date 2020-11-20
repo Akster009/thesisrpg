@@ -12,6 +12,8 @@ namespace SZDRPG.UIElements
         public Vector2f Size;
         public Color Color;
         public bool Absolute = true;
+        public bool Visible = true;
+        public RenderWindow Container;
         
         public UIElement(Vector2f position, Vector2f size, Color color)
         {
@@ -26,7 +28,7 @@ namespace SZDRPG.UIElements
 
         public virtual bool OnElement(Vec2 position)
         {
-            return position.X >= Position.X && position.X <= Position.X + Size.X && position.Y >= Position.Y &&
+            return Visible && position.X >= Position.X && position.X <= Position.X + Size.X && position.Y >= Position.Y &&
                    position.Y <= Position.Y + Size.Y;
         }
     }
