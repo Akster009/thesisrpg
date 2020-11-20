@@ -92,7 +92,7 @@ namespace SZDRPG.Model
 
         public override string ToString()
         {
-            return "PCEnvironment|" + Name + "|" + (int) Position.X + "|" + (int) Position.Y + "|" + Display.State.ID +
+            return "PEnvironment|" + Name + "|" + (int) Position.X + "|" + (int) Position.Y + "|" + Display.State.ID +
                    "|" + Display.State.facing + "|" + Display.State.elapsed.AsSeconds();
         }
 

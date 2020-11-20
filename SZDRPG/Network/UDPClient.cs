@@ -81,8 +81,6 @@ namespace SZDRPG.Network
                                 int.Parse(lines[entityLineNums + maplines + 4]));
                             game.Characters[0].Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
                             game.Characters[0].Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
-                            /*game.Characters[0].Display.State.elapsed =
-                                Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));*/
                             game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 8]);
                             game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 16]);
                             game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 17]);
@@ -109,6 +107,15 @@ namespace SZDRPG.Network
                             projectile.Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
                             /*projectile.Display.State.elapsed =
                                 Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));*/
+                            entityLineNums += 7;
+                        }
+                        else if (lines[entityLineNums + maplines + 1].Equals("PEnvironment"))
+                        {
+                            PEnvironment environment = new PEnvironment(lines[entityLineNums + maplines + 2], game);
+                            environment.Position = new Vector2f(int.Parse(lines[entityLineNums + maplines + 3]),
+                                int.Parse(lines[entityLineNums + maplines + 4]));
+                            environment.Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
+                            environment.Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
                             entityLineNums += 7;
                         }
                     }

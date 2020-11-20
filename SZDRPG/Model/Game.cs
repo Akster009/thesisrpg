@@ -240,6 +240,7 @@ namespace SZDRPG.Model
             if (Enemies.Count < 1 && !Open)
             {
                 Door.LoadGraphics("OpenDoor");
+                Door.Name = "OpenDoor";
                 Open = true;
             }
         }
