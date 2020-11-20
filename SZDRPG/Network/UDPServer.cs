@@ -83,7 +83,6 @@ namespace SZDRPG.Network
                             character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(5), 3, GameManager.Lunge));
                             GameManager.Game.AddCharacter(character);
                             GameManager.Game.NetworkPlayers.Add(character);
-                            Console.WriteLine("Added Charater");
                         }
                     }
 
@@ -97,11 +96,6 @@ namespace SZDRPG.Network
                         {
                             if (Connections[i].Equals(ip))
                                 num = i;
-                        }
-                        Console.WriteLine(ip);
-                        foreach (var line in lines)
-                        {
-                            Console.WriteLine(line);
                         }
 
                         PCharacter player = GameManager.Game.NetworkPlayers[num];
@@ -117,8 +111,13 @@ namespace SZDRPG.Network
                                 }
                                 else
                                 {
+                                    Console.WriteLine("Position: " + position.X + " " + position.Y);
+                                    Console.WriteLine("Direction: " + GameManager.Game.Map.IntersectAt(player.Position, position).Value.X + " " + GameManager.Game.Map.IntersectAt(player.Position, position).Value.Y);
                                     player.Target = null;
                                     player.Direction = GameManager.Game.Map.IntersectAt(player.Position, position);
+                                    if (player.Direction == player.Position)
+                                        player.Direction = null;
+
                                 }
                                 break;
                             case 1:

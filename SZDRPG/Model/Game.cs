@@ -83,7 +83,7 @@ namespace SZDRPG.Model
                         player = character;
                     }
                     else if ((enemyPosition.X - character.Position.X) * (enemyPosition.X - character.Position.X) +
-                             (enemyPosition.Y - character.Position.Y) * (enemyPosition.Y - character.Position.Y) >
+                             (enemyPosition.Y - character.Position.Y) * (enemyPosition.Y - character.Position.Y) <
                              (enemyPosition.X - player.Position.X) * (enemyPosition.X - player.Position.X) +
                              (enemyPosition.Y - player.Position.Y) * (enemyPosition.Y - player.Position.Y))
                         player = character;
