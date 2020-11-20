@@ -96,6 +96,7 @@ namespace SZDRPG.Network
                                 int.Parse(lines[entityLineNums + maplines + 5]));
                             game.Characters[0].Display.State.ID = int.Parse(lines[entityLineNums + maplines + 6]);
                             game.Characters[0].Display.State.facing = float.Parse(lines[entityLineNums + maplines + 7]);
+                            game.Characters[0].Display.State.elapsed = Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 8]));
                             game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 9]);
                             game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 17]);
                             game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 18]);

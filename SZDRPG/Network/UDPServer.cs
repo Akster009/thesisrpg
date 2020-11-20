@@ -111,8 +111,8 @@ namespace SZDRPG.Network
                                 }
                                 else
                                 {
-                                    Console.WriteLine("Position: " + position.X + " " + position.Y);
-                                    Console.WriteLine("Direction: " + GameManager.Game.Map.IntersectAt(player.Position, position).Value.X + " " + GameManager.Game.Map.IntersectAt(player.Position, position).Value.Y);
+                                    //Console.WriteLine("Position: " + position.X + " " + position.Y);
+                                    //Console.WriteLine("Direction: " + GameManager.Game.Map.IntersectAt(player.Position, position).Value.X + " " + GameManager.Game.Map.IntersectAt(player.Position, position).Value.Y);
                                     player.Target = null;
                                     player.Direction = GameManager.Game.Map.IntersectAt(player.Position, position);
                                     if (player.Direction == player.Position)
