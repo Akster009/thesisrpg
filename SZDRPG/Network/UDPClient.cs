@@ -77,7 +77,7 @@ namespace SZDRPG.Network
                         game.Characters[0].Position = new Vector2f(int.Parse(lines[entityLineNums + maplines + 3]),
                             int.Parse(lines[entityLineNums + maplines + 4]));
                         game.Characters[0].Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
-                        game.Characters[0].Display.State.facing = int.Parse(lines[entityLineNums + maplines + 6]);
+                        game.Characters[0].Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
                         game.Characters[0].Display.State.elapsed = Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));
                         game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 8]);
                         game.Characters[0].Experience = int.Parse(lines[entityLineNums + maplines + 16]);
@@ -90,7 +90,7 @@ namespace SZDRPG.Network
                         character.Position = new Vector2f(int.Parse(lines[entityLineNums + maplines + 3]),
                             int.Parse(lines[entityLineNums + maplines + 4]));
                         character.Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
-                        character.Display.State.facing = int.Parse(lines[entityLineNums + maplines + 6]);
+                        character.Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
                         character.Display.State.elapsed = Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));
                         game.Pentities.Add(character);
                         entityLineNums += 17;
@@ -101,7 +101,7 @@ namespace SZDRPG.Network
                         projectile.Position = new Vector2f(int.Parse(lines[entityLineNums + maplines + 3]),
                             int.Parse(lines[entityLineNums + maplines + 4]));
                         projectile.Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
-                        projectile.Display.State.facing = int.Parse(lines[entityLineNums + maplines + 6]);
+                        projectile.Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
                         projectile.Display.State.elapsed = Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));
                         entityLineNums += 7;
                     }
