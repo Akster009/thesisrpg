@@ -43,6 +43,7 @@ namespace SZDRPG.Network
             while (KeepRunning)
             {
                 UdpSender.Send(GameManager.NetworkIntent.GetMessage(), GameManager.NetworkIntent.Length);
+                Thread.Sleep(10);
             }
         }
         private void HandleMessage(string returnData, IPEndPoint RemoteIpEndPoint)

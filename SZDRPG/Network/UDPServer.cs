@@ -41,11 +41,15 @@ namespace SZDRPG.Network
         {
             while (KeepRunning)
             {
-                foreach (var connection in Connections)
+                lock(Connections)
                 {
-                    UdpSender.Connect(connection, 20201);
-                    UdpSender.Send(GameManager.Status(), GameManager.Game.StatusLength);
+                    foreach (var connection in Connections)
+                    {
+                        UdpSender.Connect(connection, 20201);
+                        UdpSender.Send(GameManager.Status(), GameManager.Game.StatusLength);
+                    }
                 }
+                Thread.Sleep(10);
             }
         }
 
@@ -57,25 +61,32 @@ namespace SZDRPG.Network
                 string ip = RemoteIpEndPoint.Address.ToString();
                 if (lines[0].Equals("JOIN") && lines[1].Equals("PCharacter"))
                 {
-                    if(!Connections.Contains(ip))
-                        Connections.Add(ip);
-                    PCharacter character = new PCharacter("Player",GameManager.Game);
-                    character.Position = new Vector2f(int.Parse(lines[3]), int.Parse(lines[4]));
-                    character.Experience = int.Parse(lines[8]);
-                    character.Level = int.Parse(lines[9]);
-                    character.SkillPoints = int.Parse(lines[10]);
-                    character.Vigor = int.Parse(lines[11]);
-                    character.Strength = int.Parse(lines[12]);
-                    character.Agility = int.Parse(lines[13]);
-                    character.Intelligence = int.Parse(lines[14]);
-                    character.Spirit = int.Parse(lines[15]);
-                    character.Health = character.Vigor;
-                    character.Mana = character.Intelligence;
-                    character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(1), 1, GameManager.Throw));
-                    character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(3), 5, GameManager.WhirlWind));
-                    character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(5), 3, GameManager.Lunge));
-                    GameManager.Game.AddCharacter(character);
-                    GameManager.Game.NetworkPlayers.Add(character);
+                    if (!Connections.Contains(ip))
+                    {
+                        lock (Connections)
+                        {
+                            Connections.Add(ip);
+                            PCharacter character = new PCharacter("Player",GameManager.Game);
+                            character.Position = new Vector2f(int.Parse(lines[3]), int.Parse(lines[4]));
+                            character.Experience = int.Parse(lines[8]);
+                            character.Level = int.Parse(lines[9]);
+                            character.SkillPoints = int.Parse(lines[10]);
+                            character.Vigor = int.Parse(lines[11]);
+                            character.Strength = int.Parse(lines[12]);
+                            character.Agility = int.Parse(lines[13]);
+                            character.Intelligence = int.Parse(lines[14]);
+                            character.Spirit = int.Parse(lines[15]);
+                            character.Health = character.Vigor;
+                            character.Mana = character.Intelligence;
+                            character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(1), 1, GameManager.Throw));
+                            character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(3), 5, GameManager.WhirlWind));
+                            character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(5), 3, GameManager.Lunge));
+                            GameManager.Game.AddCharacter(character);
+                            GameManager.Game.NetworkPlayers.Add(character);
+                            Console.WriteLine("Added Charater");
+                        }
+                    }
+
                 }
                 else
                 {
@@ -87,10 +98,15 @@ namespace SZDRPG.Network
                             if (Connections[i].Equals(ip))
                                 num = i;
                         }
+                        Console.WriteLine(ip);
+                        foreach (var line in lines)
+                        {
+                            Console.WriteLine(line);
+                        }
 
                         PCharacter player = GameManager.Game.NetworkPlayers[num];
-                        Vector2f position = new Vector2f(int.Parse(lines[2]),int.Parse(lines[3]));
-                        switch (int.Parse(lines[1]))
+                        Vector2f position = new Vector2f(int.Parse(lines[1]),int.Parse(lines[2]));
+                        switch (int.Parse(lines[0]))
                         {
                             case 0:
                                 PEntity entity = GameManager.Game.EntityAt(position);
