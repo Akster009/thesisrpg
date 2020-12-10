@@ -9,6 +9,7 @@ using SZDRPG.UIElements;
 
 namespace SZDRPG.Model
 {
+
     public class GameManager
     {
         public Game Game;
@@ -16,6 +17,7 @@ namespace SZDRPG.Model
         public List<UIElement> Elements = new List<UIElement>();
         public bool exit;
         public NetworkIntent NetworkIntent = new NetworkIntent();
+        public Sprite BackgroundImage;
 
         private void GameMouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -210,6 +212,14 @@ namespace SZDRPG.Model
 
         public void Draw(RenderWindow window)
         {
+            if (BackgroundImage != null)
+            {
+                View old = new View(window.GetView());
+                window.SetView(window.DefaultView);
+                window.Draw(BackgroundImage);
+                window.SetView(old);
+                
+            }
             Game.Draw(window);
             foreach (var element in Elements)
             {
@@ -387,7 +397,7 @@ namespace SZDRPG.Model
             window.Display();
         }
 
-        public void Throw(PCharacter character)
+        /*public void Throw(PCharacter character)
         {
             PProjectile sword = new PProjectile("Sword", Game);
             sword.Owner = character;
@@ -428,7 +438,7 @@ namespace SZDRPG.Model
                     character.Hit(gameCharacter);
                 }
             }
-        }
+        }*/
         public void InitGame(bool cont = false)
         {
             Game = new Game();
@@ -439,18 +449,18 @@ namespace SZDRPG.Model
             if (cont)
             {
                 Game.AddCharacter(Game.LoadCharacter(new Vector2f(30, 30), new Vector2f(70, 100)));
-                Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(1), 1, Throw));
-                Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(3), 5, WhirlWind));
-                Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(5), 3, Lunge));
+                Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(1), 1, EntityActions.Throw));
+                Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(3), 5, EntityActions.WhirlWind));
+                Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(5), 3, EntityActions.Lunge));
             }
             else
             {
                 Game.AddCharacter("Player", new Vector2f(30, 30), new Vector2f(70, 100));
-                Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(1), 1, Throw));
-                Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(3), 5, WhirlWind));
-                Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(5), 3, Lunge));
+                Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(1), 1, EntityActions.Throw));
+                Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(3), 5, EntityActions.WhirlWind));
+                Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(5), 3, EntityActions.Lunge));
             }
-            GameRoom gameroom = new GameRoom(Game, new Vector2i(10,7));
+            GameRoom gameroom = new GameRoom(Game, new Vector2i(20,14));
             Game.LoadRoom(gameroom);
             Game.Start = false;
         }

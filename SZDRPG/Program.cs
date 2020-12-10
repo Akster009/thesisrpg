@@ -57,6 +57,7 @@ namespace SZDRPG
         private static void PlaySingleGame(RenderWindow window, bool continueGame = false)
         {
             GameManager = new GameManager(window);
+            GameManager.BackgroundImage = new Sprite(new Texture("../../../Resources/Images/Game/Background.png"));
             GameManager.RunGame(window, continueGame);
             window.SetView(window.DefaultView);
             MenuManager.menu = 0;

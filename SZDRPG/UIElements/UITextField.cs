@@ -82,6 +82,7 @@ namespace SZDRPG.UIElements
         {
             if (Editable)
             {
+                Container.KeyPressed -= TextKeyDown;
                 Container.KeyPressed += TextKeyDown;
             }
         }

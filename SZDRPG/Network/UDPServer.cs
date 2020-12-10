@@ -78,9 +78,9 @@ namespace SZDRPG.Network
                             character.Spirit = int.Parse(lines[15]);
                             character.Health = character.Vigor;
                             character.Mana = character.Intelligence;
-                            character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(1), 1, GameManager.Throw));
-                            character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(3), 5, GameManager.WhirlWind));
-                            character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(5), 3, GameManager.Lunge));
+                            character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(1), 1, EntityActions.Throw));
+                            character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(3), 5, EntityActions.WhirlWind));
+                            character.Abilities.Add(new PCharacter.Ability(Time.FromSeconds(5), 3, EntityActions.Lunge));
                             GameManager.Game.AddCharacter(character);
                             GameManager.Game.NetworkPlayers.Add(character);
                         }
