@@ -15,8 +15,9 @@ namespace SZDRPG.Network
         public string Message = "";
         public GameManager GameManager;
         public List<string> Connections = new List<string>();
-        public UdpClient UdpReceiver = new UdpClient(20200);
-        public UdpClient UdpSender = new UdpClient(20201);
+        public UdpClient UdpReceiver = new UdpClient(/*20200*/);
+        public UdpClient UdpSender = new UdpClient(/*20201*/);
+        public bool Online = true;
 
         public void Run()
         {
@@ -27,29 +28,50 @@ namespace SZDRPG.Network
 
         public void Receive()
         {
-            
-            IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 20200);
-            while (KeepRunning)
+            try
             {
-                Byte[] receiveBytes = UdpReceiver.Receive(ref RemoteIpEndPoint);
-                string returnData = Encoding.ASCII.GetString(receiveBytes);
-                HandleMessage(returnData, RemoteIpEndPoint);
+                IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Loopback, 20200);
+                UdpReceiver.Connect(RemoteIpEndPoint);
+                while (KeepRunning)
+                {
+                    Byte[] receiveBytes = UdpReceiver.Receive(ref RemoteIpEndPoint);
+                    string returnData = Encoding.ASCII.GetString(receiveBytes);
+                    HandleMessage(returnData, RemoteIpEndPoint);
+                }
+
+                UdpReceiver.Close();
+            }
+            catch (Exception e)
+            {
+                UdpReceiver.Close();
+                UdpSender.Close();
+                Online = false;
             }
         }
 
         public void Send()
         {
-            while (KeepRunning)
+            try
             {
-                lock(Connections)
+                while (KeepRunning)
                 {
-                    foreach (var connection in Connections)
+                    lock (Connections)
                     {
-                        UdpSender.Connect(connection, 20201);
-                        UdpSender.Send(GameManager.Status(), GameManager.Game.StatusLength);
+                        foreach (var connection in Connections)
+                        {
+                            UdpSender.Connect(connection, 20201);
+                            UdpSender.Send(GameManager.Status(), GameManager.Game.StatusLength);
+                        }
                     }
                 }
-                //Thread.Sleep(10);
+
+                UdpSender.Close();
+            }
+            catch (Exception e)
+            {
+                UdpSender.Close();
+                UdpReceiver.Close();
+                Online = false;
             }
         }
 
@@ -111,8 +133,6 @@ namespace SZDRPG.Network
                                 }
                                 else
                                 {
-                                    //Console.WriteLine("Position: " + position.X + " " + position.Y);
-                                    //Console.WriteLine("Direction: " + GameManager.Game.Map.IntersectAt(player.Position, position).Value.X + " " + GameManager.Game.Map.IntersectAt(player.Position, position).Value.Y);
                                     player.Target = null;
                                     player.Direction = GameManager.Game.Map.IntersectAt(player.Position, position);
                                     if (player.Direction == player.Position)

@@ -87,7 +87,6 @@ namespace SZDRPG.Graphics
             Time timeInState = state.elapsed - part.TotalStepTimeUntil(state.elapsed);
             float currentRotation;
             currentRotation = LastRotation + (NewRotation - LastRotation) * timeInState.AsSeconds() / step.Duration.AsSeconds();
-            //float actualRotation = (state.facing - (int)(state.facing)/90*90)/ 90 * currentRotation;
             float actualRotation =
                 MathF.Atan(MathF.Tan(currentRotation * MathF.PI / 180) * MathF.Sin(state.facing * MathF.PI / 180)) *
                 180 / MathF.PI;
@@ -99,7 +98,6 @@ namespace SZDRPG.Graphics
             ret.Position = new Vector2f(
                 (float) (state.Position.X + Math.Cos((Math.PI / 180) * state.facing) * RotationCenter.X)  - Origin.X - ret.GetLocalBounds().Width / 2,
                 (float) (state.Position.Y + Math.Sin((Math.PI / 180) * state.facing) * RotationCenter.X / 2 + RotationCenter.Y + Origin.Y));
-            //ret.Rotation = 90;
             return ret;
         }
     }

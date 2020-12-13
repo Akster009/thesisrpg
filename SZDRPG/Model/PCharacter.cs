@@ -199,18 +199,6 @@ namespace SZDRPG.Model
         }
         public override void Draw(RenderWindow window)
         {
-            /*VertexArray hitbox = new VertexArray(PrimitiveType.TriangleFan);
-            hitbox.Append(new Vertex(Position,Color.Red));
-            hitbox.Append(new Vertex(new Vector2f(Position.X-hitMesh.Size.X/2, Position.Y), Color.Red));
-            hitbox.Append(new Vertex(new Vector2f(Position.X-hitMesh.Size.X/2, Position.Y - hitMesh.Size.Y), Color.Red));
-            hitbox.Append(new Vertex(new Vector2f(Position.X+hitMesh.Size.X/2, Position.Y - hitMesh.Size.Y), Color.Red));
-            hitbox.Append(new Vertex(new Vector2f(Position.X+hitMesh.Size.X/2, Position.Y), Color.Red));
-            hitbox.Append(new Vertex(new Vector2f(Position.X-hitMesh.Size.X/2, Position.Y), Color.Red));
-            CircleShape reach = new CircleShape(Reach);
-            reach.Position = new Vector2f(Position.X - Reach, Position.Y - Reach);
-            reach.FillColor = Color.Blue;
-            window.Draw(hitbox);
-            window.Draw(reach);*/
             Display.Draw(window, Position);
         }
         public override void NextAction(Time elapsed)

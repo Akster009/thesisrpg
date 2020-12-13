@@ -10,7 +10,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Menu" />
       <Folder Include="Resources\Fonts" />
       <Folder Include="Resources\Graphics\Character" />
       <Folder Include="Resources\Graphics\Environment" />

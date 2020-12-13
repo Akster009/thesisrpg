@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using SFML.Graphics;
 using SFML.System;
@@ -65,7 +66,16 @@ namespace SZDRPG
         private static void PlayMultiGame(RenderWindow window, bool host)
         {
             GameManager = new GameManager(window);
-            GameManager.RunMultiGame(window, host, MenuManager.IP);
+            GameManager.BackgroundImage = new Sprite(new Texture("../../../Resources/Images/Game/Background.png"));
+            try
+            {
+                GameManager.RunMultiGame(window, host, MenuManager.IP);
+            }
+            catch (Exception e)
+            {
+                MenuManager.Error = "A network error has occured";
+                MenuManager.Menu = MenuManager.BuildMultiMenu(window);
+            }
             window.SetView(window.DefaultView);
             MenuManager.menu = 0;
         }

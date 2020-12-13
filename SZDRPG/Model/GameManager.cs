@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security;
 using System.Threading;
 using SFML.Graphics;
 using SFML.System;
@@ -233,7 +234,6 @@ namespace SZDRPG.Model
             if(args.Button == Mouse.Button.Left)
             {
                 bool UIClick = false;
-                //Vector2f position = new Vector2f(args.X, args.Y);
                 foreach (var element in Elements)
                 {
                     Vector2f pos = new Vector2f(args.X, args.Y);
@@ -330,7 +330,6 @@ namespace SZDRPG.Model
             {
                 Game.Characters[0].Direction = Game.Map.IntersectAt(Game.Characters[0].Position,window.MapPixelToCoords(Mouse.GetPosition(window)));
                 Game.Characters[0].Target = null;
-                //Game.Characters[0].Display.State.UpdateFacing(window.MapPixelToCoords(Mouse.GetPosition(window)));
             }
         }
         public void NetworkHolding(RenderWindow window)
@@ -391,54 +390,10 @@ namespace SZDRPG.Model
             window.Clear();
             mainView.Center = new Vector2f(Game.Pentities[0].Position.X,
                 Game.Pentities[0].Position.Y);
-            //Console.WriteLine(mainView.Center.X + " " + mainView.Center.Y);
             window.SetView(mainView);
             Draw(window);
             window.Display();
         }
-
-        /*public void Throw(PCharacter character)
-        {
-            PProjectile sword = new PProjectile("Sword", Game);
-            sword.Owner = character;
-            sword.Position = character.Position;
-            sword.Velocity = new Vector2f(MathF.Cos((MathF.PI / 180) * (character.Display.State.facing + 90)) * 300,
-                MathF.Sin((MathF.PI / 180) * (character.Display.State.facing + 90)) * 300);
-            sword.Display.State.facing = character.Display.State.facing;
-            Game.Pentities.Add(sword);
-        }
-
-        public void WhirlWind(PCharacter character)
-        {
-            foreach (var gameCharacter in Game.Characters)
-            {
-                if (gameCharacter != character && character.InReach(gameCharacter,2))
-                {
-                    character.Hit(gameCharacter);
-                }
-            }
-        }
-
-        public void Lunge(PCharacter character)
-        {
-            character.Position += new Vector2f(MathF.Cos((MathF.PI / 180) * (character.Display.State.facing + 90)) * character.Speed*2,
-                MathF.Sin((MathF.PI / 180) * (character.Display.State.facing + 90)) * 100);
-            if (character.Position.X < 0)
-                character.Position.X = 0;
-            if (character.Position.X > Game.Map.Size.X)
-                character.Position.X = Game.Map.Size.X;
-            if (character.Position.Y < 0)
-                character.Position.Y = 0;
-            if (character.Position.Y > Game.Map.Size.X)
-                character.Position.Y = Game.Map.Size.X;
-            foreach (var gameCharacter in Game.Characters)
-            {
-                if (gameCharacter != character && character.InReach(gameCharacter))
-                {
-                    character.Hit(gameCharacter);
-                }
-            }
-        }*/
         public void InitGame(bool cont = false)
         {
             Game = new Game();
@@ -460,7 +415,7 @@ namespace SZDRPG.Model
                 Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(3), 5, EntityActions.WhirlWind));
                 Game.Characters[0].Abilities.Add(new PCharacter.Ability(Time.FromSeconds(5), 3, EntityActions.Lunge));
             }
-            GameRoom gameroom = new GameRoom(Game, new Vector2i(20,14));
+            GameRoom gameroom = new GameRoom(Game, new Vector2i(40,30));
             Game.LoadRoom(gameroom);
             Game.Start = false;
         }
@@ -507,7 +462,7 @@ namespace SZDRPG.Model
                     Center = new Vector2f(Game.Pentities[0].Position.X, Game.Pentities[0].Position.Y),
                     Viewport = new FloatRect(0, 0, 1, 1)
                 };
-                while (!exit)
+                while (!exit && server.Online)
                 {
                     if (Game.Start)
                         InitGame(true);
@@ -536,6 +491,14 @@ namespace SZDRPG.Model
                     Center = new Vector2f(Game.Pentities[0].Position.X, Game.Pentities[0].Position.Y),
                     Viewport = new FloatRect(0, 0, 1, 1)
                 };
+                while (!client.Connected)
+                {
+                    if (timer.ElapsedTime.AsSeconds() > 5)
+                    {
+                        client.KeepRunning = false;
+                        throw new Exception("Could not connect to remote host");
+                    }
+                }
                 while (!exit)
                 {
                     lock (Game)

@@ -17,24 +17,39 @@ namespace SZDRPG.Network
         public UdpClient UdpReceiver = new UdpClient(20201);
         public UdpClient UdpSender = new UdpClient(20200);
         public Byte[] ReceiveBytes;
+        public bool Connected = false;
 
         public void Run()
         {
-            Thread sender = new Thread(Send);
-            Thread proccess = new Thread(Proccess);
-            sender.Start();
-            proccess.Start();
-            Receive();
+            try
+            {
+                Thread sender = new Thread(Send);
+                Thread proccess = new Thread(Proccess);
+                sender.Start();
+                proccess.Start();
+                Receive();
+            }
+            catch (Exception e)
+            {
+                Connected = false;
+            }
         }
         public void Receive()
         {
-            
-            IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 20201);
-            while (KeepRunning)
+            try
             {
-                //Console.WriteLine(UdpReceiver.Available);
-                ReceiveBytes = UdpReceiver.Receive(ref RemoteIpEndPoint);
-                //Byte[] receiveBytes = UdpReceiver.ReceiveAsync().Result.Buffer;
+                IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 20201);
+                while (KeepRunning)
+                {
+                    ReceiveBytes = UdpReceiver.Receive(ref RemoteIpEndPoint);
+                    Connected = true;
+                }
+
+                UdpReceiver.Close();
+            }
+            catch (Exception e)
+            {
+                Connected = false;
             }
         }
 
@@ -52,13 +67,22 @@ namespace SZDRPG.Network
         
         public void Send()
         {
-            UdpSender.Connect(Host, 20200);
-            byte[] join = Encoding.ASCII.GetBytes("JOIN|" + GameManager.Game.Characters[0]);
-            UdpSender.Send(join, join.Length);
-            while (KeepRunning)
+            try
             {
-                UdpSender.Send(GameManager.NetworkIntent.GetMessage(), GameManager.NetworkIntent.Length);
-                Thread.Sleep(10);
+                UdpSender.Connect(Host, 20200);
+                byte[] join = Encoding.ASCII.GetBytes("JOIN|" + GameManager.Game.Characters[0]);
+                UdpSender.Send(join, join.Length);
+                while (KeepRunning)
+                {
+                    UdpSender.Send(GameManager.NetworkIntent.GetMessage(), GameManager.NetworkIntent.Length);
+                    Thread.Sleep(10);
+                }
+
+                UdpSender.Close();
+            }
+            catch (Exception e)
+            {
+                Connected = false;
             }
         }
         private void HandleMessage(string returnData)
@@ -109,8 +133,6 @@ namespace SZDRPG.Network
                                 int.Parse(lines[entityLineNums + maplines + 4]));
                             character.Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
                             character.Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
-                            /*character.Display.State.elapsed =
-                                Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));*/
                             game.Pentities.Add(character);
                             entityLineNums += 17;
                         }
@@ -121,8 +143,6 @@ namespace SZDRPG.Network
                                 int.Parse(lines[entityLineNums + maplines + 4]));
                             projectile.Display.State.ID = int.Parse(lines[entityLineNums + maplines + 5]);
                             projectile.Display.State.facing = float.Parse(lines[entityLineNums + maplines + 6]);
-                            /*projectile.Display.State.elapsed =
-                                Time.FromSeconds(float.Parse(lines[entityLineNums + maplines + 7]));*/
                             entityLineNums += 7;
                         }
                         else if (lines[entityLineNums + maplines + 1].Equals("PEnvironment"))

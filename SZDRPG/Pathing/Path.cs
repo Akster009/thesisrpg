@@ -63,11 +63,6 @@ namespace SZDRPG.Pathing
                     wayPoint.PreviousWayPoint = previous;
                     wayPoints.Add(wayPoint);
                     current = FindBestWaypoint(wayPoints, previous.Location, EndingPoint);
-                    /*foreach (var wayPoint in wayPoints)
-                    {
-                        wayPoint.Closed = false;
-                    }
-                    return ReconstructPath(previous);*/
                 }
                 else if (current.Location == EndingPoint)
                 {
@@ -77,7 +72,6 @@ namespace SZDRPG.Pathing
                     }
                     return ReconstructPath(current);
                 }
-                //wayPoints.Remove(current);
                 current.Closed = true;
                 AddWayPoints(ref wayPoints, current, EndingPoint);
             }
@@ -92,7 +86,6 @@ namespace SZDRPG.Pathing
                 Vector2f edge = new Vector2f(current.Location.X - current.PreviousWayPoint.Location.X,
                     current.Location.Y - current.PreviousWayPoint.Location.Y);
                 PathEdges.Add(edge);
-                //Console.WriteLine(current.Location.X + " " + current.Location.Y);
                 current = current.PreviousWayPoint;
             }
 

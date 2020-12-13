@@ -231,7 +231,6 @@ namespace SZDRPG.Model
                 Characters.Add(enemy);
                 Enemies.Add(enemy);
             }
-            //room.GenerateWalls();
             LoadRoom(room);
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
@@ -11,6 +12,7 @@ namespace SZDRPG.Model
         public int menu;
         public UIWindow Menu;
         public string IP;
+        public string Error;
 
         public MenuManager(RenderWindow window)
         {
@@ -51,6 +53,7 @@ namespace SZDRPG.Model
         private void StartMultiGame(object sender, EventArgs args)
         {
             menu = 3;
+            ((UITextField)Menu.Elements.Last()).UpdateText("");
         }
         private void JoinGame(object sender, EventArgs args)
         {
@@ -60,10 +63,12 @@ namespace SZDRPG.Model
         private void ToJoinMenu(object sender, EventArgs args)
         {
             Menu = BuildJoinMenu((RenderWindow) sender);
+            Error = "";
         }
         private void BackToMainMenu(object sender, EventArgs args)
         {
             Menu = BuildMainMenu((RenderWindow) sender);
+            Error = "";
         }
         
         private void BackToMultiMenu(object sender, EventArgs args)
@@ -97,7 +102,7 @@ namespace SZDRPG.Model
             return ret;
         }
         
-        private UIWindow BuildMultiMenu(RenderWindow window)
+        public UIWindow BuildMultiMenu(RenderWindow window)
         {
             UIWindow ret = new UIWindow(new Vector2f(0, 0), new Vector2f(window.Size.X, window.Size.Y), "../../../Resources/Images/Menu/main.jpg");
             Vector2f buttonSize = new Vector2f(window.Size.X/5, window.Size.Y/10);
@@ -105,9 +110,11 @@ namespace SZDRPG.Model
             UIButton hostGame = new UIButton(new Vector2f(buttonPos.X,buttonPos.Y), buttonSize, new Color(41,182,246), "HOST GAME",new Vector2f(30,30),"", StartMultiGame);
             UIButton joinGame = new UIButton(new Vector2f(buttonPos.X,buttonPos.Y+buttonSize.Y*4/3), buttonSize, new Color(41,182,246), "JOIN GAME",new Vector2f(30,30),"", ToJoinMenu);
             UIButton backButton = new UIButton(new Vector2f(buttonPos.X,buttonPos.Y+buttonSize.Y*2*4/3),buttonSize, new Color(41,182,246), "BACK",new Vector2f(30,30),"Cross",BackToMainMenu);
+            UITextField errorMessage = new UITextField(new Vector2f(window.Size.X/3, buttonPos.Y - buttonSize.Y*4/3), new Vector2f(window.Size.X/3, buttonSize.Y),Color.Transparent, new Vector2f(0,0),Error);
             ret.Elements.Add(hostGame);
             ret.Elements.Add(joinGame);
             ret.Elements.Add(backButton);
+            ret.Elements.Add(errorMessage);
             return ret;
         }
         
